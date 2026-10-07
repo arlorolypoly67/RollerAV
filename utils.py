@@ -14,3 +14,11 @@ def hash_file(fp: Path):
 def load_hashes(fp: Path):
     with fp.open('r') as f:
         return {line.strip().lower() for line in f}
+
+def scan_file(fp: Path, known_hashes: set[str]):
+    if not fp.exists():
+        return None
+
+    hashed = hash_file(fp)
+
+    return hashed in known_hashes
