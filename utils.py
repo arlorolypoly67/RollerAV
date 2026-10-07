@@ -10,3 +10,7 @@ def hash_file(fp: Path):
             hasher.update(chunk)
 
     return hasher.hexdigest()
+
+def load_hashes(fp: Path):
+    with fp.open('r') as f:
+        return {line.strip().lower() for line in f}
