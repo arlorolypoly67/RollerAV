@@ -15,7 +15,7 @@ PARTITIONS = [
 ]
 
 OUTPUT = Path('hashes.txt')
-
+OUTPUT_TEMP = OUTPUT.with_suffix('.tmp')
 
 def download_hashes() -> None:
     hashes = set()
@@ -32,9 +32,11 @@ def download_hashes() -> None:
                 if line and not line.startswith('#'):
                     hashes.add(line.lower())
 
-    with OUTPUT.open('w') as f:
+    with OUTPUT_TEMP.open('w') as f:
         for hashed in sorted(hashes):
             f.write(hashed + '\n')
+
+    OUTPUT_TEMP.replace(OUTPUT)
 
     print('Downloaded %d hashes.' % len(hashes))
 
