@@ -16,7 +16,7 @@ def load_hashes(fp: Path):
         return {line.strip().lower() for line in f}
 
 def scan_file(fp: Path, known_hashes: set[str]):
-    if not fp.exists():
+    if not fp.is_file():
         return None, None
 
     hashed = hash_file(fp)

@@ -3,6 +3,8 @@ from utils import *
 from win11toast import toast
 import tkinter.messagebox as mb
 
+FILE_DIR = Path(__file__).parent
+
 root = ctk.CTk()
 root.title('RollerAV')
 root.geometry('800x800')
@@ -12,6 +14,7 @@ FONT_TITLE = ctk.CTkFont('Segoe UI', 32)
 FONT_SUBTITLE = ctk.CTkFont('Segoe UI', 26)
 FONT_SMALL = ctk.CTkFont('Segoe UI', 18)
 PADDING = {'pady': 13, 'padx': 5}
+MALICIOUS_HASHES = load_hashes(FILE_DIR / 'hashes.txt')
 
 root.option_add('*Font', FONT_TEXT)
 
@@ -25,6 +28,10 @@ status_label = ctk.CTkLabel(hometab, text='System status: SECURE', font=FONT_TIT
 status_label.pack(**PADDING)
 
 ctk.CTkButton(hometab, text='Quick Scan', command=lambda: None).pack(**PADDING)
+
+scantab = tabview.add('Scan')
+
+ctk.CTkLabel(scantab, text='Scan Manager', font=FONT_TITLE).pack(**PADDING)
 
 if __name__ == '__main__':
     root.mainloop()
