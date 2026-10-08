@@ -2,6 +2,7 @@ import customtkinter as ctk
 from utils import *
 from win11toast import toast
 import tkinter.messagebox as mb
+from datetime import datetime
 
 FILE_DIR = Path(__file__).parent
 
@@ -32,6 +33,14 @@ ctk.CTkButton(hometab, text='Quick Scan', command=lambda: None).pack(**PADDING)
 scantab = tabview.add('Scan')
 
 ctk.CTkLabel(scantab, text='Scan Manager', font=FONT_TITLE).pack(**PADDING)
+
+logbox = ctk.CTkTextbox(scantab, state='disabled', width=700, height=400, font=FONT_SMALL)
+logbox.pack(**PADDING)
+
+def log(message, level='info'):
+    logbox.configure(state='normal')
+    logbox.insert('end', f'[{datetime.now().strftime("%Y-%m-%d %I:%M:%S %p")}] [{level.upper()}] {message}\n')
+    logbox.configure(state='disabled')
 
 if __name__ == '__main__':
     root.mainloop()
