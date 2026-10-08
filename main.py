@@ -1,7 +1,6 @@
 import customtkinter as ctk
 from utils import load_hashes, scan_file
 from win11toast import toast
-import tkinter.messagebox as mb
 import tkinter.filedialog as fd
 from datetime import datetime
 from pathlib import Path
@@ -71,6 +70,8 @@ def process_stuff_queue():
 
         if type_ == 'update_status':
             status_label.configure(text=f'System status: {value.upper()}')
+        elif type_ == 'toast':
+            toast(message=value, app_id="RollerAV")
 
     root.after(100, process_stuff_queue)
 
@@ -85,7 +86,7 @@ def custom_scan_file(fp):
 
     if detected:
         message = f'{fp} was detected as malware (SHA256: {filehash})'
-        toast(app_id='RollerAV', message=f'ALERT: {message}')
+        stuff_queue.put(('toast', f'ALERT: {message}'))
         log(message, level='alert')
         set_status('infected')
     else:
