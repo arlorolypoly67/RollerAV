@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from utils import load_hashes, scan_file
-from win11toast import toast
+from win11toast import notify
 import tkinter.filedialog as fd
 from datetime import datetime
 from pathlib import Path
@@ -71,14 +71,21 @@ def process_stuff_queue():
         if type_ == 'update_status':
             status_label.configure(text=f'System status: {value.upper()}')
         elif type_ == 'toast':
-            toast(body=value, app_id="RollerAV")
+            notify(
+                app_id='RollerAV',
+                body=value
+            )
 
     root.after(100, process_stuff_queue)
 
 def custom_scan_file(fp):
     log('Custom scan started')
 
-    detected, filehash = scan_file(fp, MALICIOUS_HASHES)
+    try:
+        detected, filehash = scan_file(fp, MALICIOUS_HASHES)
+    except Exception as e:
+        log(f'Error: {e}', 'error')
+        return
 
     if detected is None and filehash is None:
         log('File not found', 'error')
@@ -92,6 +99,42 @@ def custom_scan_file(fp):
     else:
         log(f'{fp} was not detected as malware')
         set_status('clean')
+
+def custom_scan_folder(fp):
+    log('Custom scan started')
+    mal = 0
+    clean = 0
+
+    for entry in fp.rglob('*'):
+        if not entry.is_file():
+            continue
+
+        log(f'Processing file {entry}')
+
+        try:
+            detected, filehash = scan_file(entry, MALICIOUS_HASHES)
+        except Exception as e:
+            log(f'{e}', 'error')
+            continue
+
+        if detected is None and filehash is None:
+            log('File not found', 'error')
+            continue
+
+        if detected:
+            message = f'{entry} was detected as malware (SHA256: {filehash})'
+            stuff_queue.put(('toast', f'ALERT: {message}'))
+            log(message, level='alert')
+            mal += 1
+            set_status('infected')
+        else:
+            clean += 1
+            log(f'{entry} was not detected as malware')
+
+    if mal == 0:
+        set_status('clean')
+
+    log(f'{mal} file(s) detected, {clean} clean file(s)')
 
 def start_custom_scan_file():
     selected = fd.askopenfilename(
@@ -109,7 +152,24 @@ def start_custom_scan_file():
         daemon=True
     ).start()
 
+def start_custom_scan_dir():
+    selected = fd.askdirectory(
+        title='Scan a directory',
+        parent=root
+    )
+
+    if not selected:
+        log('Custom scan cancelled')
+        return
+
+    threading.Thread(
+        target=custom_scan_folder,
+        args=(Path(selected).resolve(),),
+        daemon=True
+    ).start()
+
 ctk.CTkButton(scantab, text='Scan File', command=start_custom_scan_file).pack(**PADDING)
+ctk.CTkButton(scantab, text='Scan Folder', command=start_custom_scan_dir).pack(**PADDING)
 
 if __name__ == '__main__':
     process_log_queue()
