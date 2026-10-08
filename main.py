@@ -71,7 +71,7 @@ def process_stuff_queue():
         if type_ == 'update_status':
             status_label.configure(text=f'System status: {value.upper()}')
         elif type_ == 'toast':
-            toast(message=value, app_id="RollerAV")
+            toast(body=value, app_id="RollerAV")
 
     root.after(100, process_stuff_queue)
 
